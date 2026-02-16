@@ -12,7 +12,8 @@ To build and train a neural network model using PyTorch to predict output values
 ## Neural Network Model
 
 Include the neural network model diagram.
-<img width="1033" height="682" alt="image" src="https://github.com/user-attachments/assets/626f3235-9f33-4652-803d-87b730281859" />
+<img width="1523" height="887" alt="image" src="https://github.com/user-attachments/assets/e4de192b-2060-4355-93ac-d8ab15e90827" />
+
 
 
 ## DESIGN STEPS
@@ -50,101 +51,72 @@ Evaluate the model with the testing data.
 ### Register Number: 212224220098
 ```python
 
-
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import pandas as pd
-import matplotlib.pyplot as plt
-
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
-
-data = pd.read_csv("dataset.csv")
-
-X = data.iloc[:, :-1].values   # Input features
-y = data.iloc[:, -1].values.reshape(-1, 1)  # Output
-
--
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
-
-
-scaler_x = MinMaxScaler()
-scaler_y = MinMaxScaler()
-
-X_train = scaler_x.fit_transform(X_train)
-X_test = scaler_x.transform(X_test)
-
-y_train = scaler_y.fit_transform(y_train)
-y_test = scaler_y.transform(y_test)
-
-# Convert to tensors
-X_train = torch.tensor(X_train, dtype=torch.float32)
-X_test = torch.tensor(X_test, dtype=torch.float32)
-y_train = torch.tensor(y_train, dtype=torch.float32)
-y_test = torch.tensor(y_test, dtype=torch.float32)
-
-
 class NeuralNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(2, 8)
-        self.fc2 = nn.Linear(8, 4)
-        self.fc3 = nn.Linear(4, 1)
-
-    def forward(self, x):
-        x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
+        self.fc1 = nn.Linear(2,16)
+        self.fc2 = nn.Linear(16,8)
+        self.fc3 = nn.Linear(8,1)
+        self.relu = nn.ReLU()
+        
+    def forward(self,x):
+        x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x))
         x = self.fc3(x)
         return x
 
+# Initialize model
 model = NeuralNet()
-
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 
-def train_model(model, X_train, y_train, criterion, optimizer, epochs=2000):
-    losses = []
 
+def train_model(ai_brain, X_train, y_train, criterion, optimizer, epochs=2000):
+    losses = []
+    
     for epoch in range(epochs):
         optimizer.zero_grad()
-        output = model(X_train)
+        output = ai_brain(X_train)
         loss = criterion(output, y_train)
         loss.backward()
         optimizer.step()
-
+        
         losses.append(loss.item())
-
+        
         if epoch % 200 == 0:
-            print(f"Epoch {epoch} - Loss: {loss.item():.6f}")
-
+            print(f"Epoch {epoch}, Loss: {loss.item()}")
+    
     return losses
 
 losses = train_model(model, X_train, y_train, criterion, optimizer)
 
 
-plt.plot(losses)
-plt.xlabel("Iterations")
-plt.ylabel("Training Loss")
-plt.title("Training Loss Vs Iteration")
-plt.show()
+model.eval()
+with torch.no_grad():
+    predictions = model(X_test)
+
+mse = mean_squared_error(y_test, predictions)
+r2 = r2_score(y_test, predictions)
+
+print("\nName:Shivasri")
+print("Register Number:212224220098")
+print("\nEvaluation Results:")
+print("Mean Squared Error:", mse)
+print("R2 Score:", r2)
+
+# New Sample Prediction
+new_sample = np.array([[35,45]])
+new_sample_scaled = scaler_X.transform(new_sample)
+new_sample_tensor = torch.FloatTensor(new_sample_scaled)
 
 with torch.no_grad():
-    test_output = model(X_test)
-    test_loss = criterion(test_output, y_test)
-    print("Testing Loss:", test_loss.item())
+    pred = model(new_sample_tensor)
 
-sample_input = torch.tensor([[60, 70]], dtype=torch.float32)
-sample_input_scaled = scaler_x.transform(sample_input)
-sample_input_scaled = torch.tensor(sample_input_scaled, dtype=torch.float32)
+pred_actual = scaler_y.inverse_transform(pred.numpy())
 
-predicted_scaled = model(sample_input_scaled)
-predicted = scaler_y.inverse_transform(predicted_scaled.detach().numpy())
+print("\nNew Sample Input: [35, 45]")
+print("Predicted Output:", pred_actual[0][0])
 
-print("Sample Input: [60, 70]")
-print("Predicted Output:", predicted[0][0])
 
 
 
@@ -160,13 +132,15 @@ Include screenshot of the dataset
 ### Training Loss Vs Iteration Plot
 
 Include your plot here
+
 <img width="792" height="595" alt="image" src="https://github.com/user-attachments/assets/7b64a460-c1ed-4727-bc1a-c20458620fb0" />
 
 
 ### New Sample Data Prediction
 
 Include your sample input and output here
-<img width="1487" height="594" alt="image" src="https://github.com/user-attachments/assets/3ec9a442-59cd-41d5-a462-336bdd4b0da4" />
+<img width="780" height="225" alt="image" src="https://github.com/user-attachments/assets/2f9bafa2-55a0-4af1-ba73-127f805c247e" />
+
 
 
 ## RESULT
